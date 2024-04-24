@@ -30,3 +30,6 @@ Route::group(["middleware"=> ["auth:api"]
     Route::get("profile",[ApiController::class,"profile"]);
     Route::get("logout",[ApiController::class,"logout"]);
 });
+// Route::group(['"middleware"=> ["auth:api"]'],function(){
+//     Route::get("profile",[ApiController::class,"profile"]);
+// });
