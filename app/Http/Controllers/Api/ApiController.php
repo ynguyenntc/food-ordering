@@ -53,30 +53,57 @@ class ApiController extends Controller
     //API login (POST)
     public function login(Request $request)
     {
-        // check input data
-        $request->validate([
+        // // check input data
+        // $request->validate([
+        //     "email" => "required|email",
+        //     "password" => "required"
+        // ]);
+
+        // // check login
+        // $token = Auth::attempt([
+        //     "email" => $request->email,
+        //     "password" => $request->password
+        // ]); 
+        // if(!empty($token)){
+        //     return response()->json([
+        //         "status" => true,
+        //         "message" => "Login Succesfull",
+        //         "token" => $token
+        //     ]);
+        // }
+        // else {
+        //     return response()->json([
+        //         "status" => false,
+        //         "message" => "Invalid Credentials",
+        //     ]);
+        // }
+         // Data validation
+         $request->validate([
             "email" => "required|email",
             "password" => "required"
         ]);
 
-        // check login
-        $token = Auth::attempt([
+        // Auth Facade
+        if(Auth::attempt([
             "email" => $request->email,
             "password" => $request->password
-        ]); 
-        if(!empty($token)){
+        ])){
+       
+            $user = Auth::user();
+
+            $token = $user->createToken("myToken")->accessToken;
+
             return response()->json([
                 "status" => true,
-                "message" => "Login Succesfull",
-                "token" => $token
+                "message" => "Login successful",
+                "access_token" => $token
             ]);
         }
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Invalid Credentials",
-            ]);
-        }
+
+        return response()->json([
+            "status" => false,
+            "message" => "Invalid credentials"
+        ]);
 
     }
 
@@ -84,6 +111,12 @@ class ApiController extends Controller
     //API profile (GET)
     public function profile()
     {
+        $user = Auth::user();
+        return response()->json([
+            "status"=> true,
+            "message"=> "Show profile user",
+            "data" => $user
+        ]);
         
     }
 
