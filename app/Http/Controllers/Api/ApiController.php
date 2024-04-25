@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Password;
+use Illuminate\Support\Facades\RateLimiter;
 // use Carbon\Carbon;
 
 class ApiController extends Controller
@@ -77,6 +78,16 @@ class ApiController extends Controller
         //         "message" => "Invalid Credentials",
         //     ]);
         // }
+        //Limit 5 login/minute/email
+        if (RateLimiter::tooManyAttempts('send-message:'.$request->email, $perMinute = 5)) {
+            $seconds = RateLimiter::availableIn('send-message:'.$request->email);
+         
+            return response()->json([
+                "success" => false,
+                "message" => "Too many login attempts. Please try again in $seconds seconds.",
+            ]);
+        }           
+        RateLimiter::increment('send-message:'.$request->email);
          // Data validation
          $request->validate([
             "email" => "required|email",

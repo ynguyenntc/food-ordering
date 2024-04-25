@@ -30,6 +30,26 @@ class User extends Authenticatable
         'role',
     ];
 
+    // auto create id
+    // protected static function boot()
+    // {
+    //     parent::boot();
+    //     self::creating((function ($model) {
+    //         $getUser = self::orderBy('id', 'desc')->first();
+    //         if($getUser){
+    //             $lastestID = intval(substr($getUser->id,3));
+    //             $nextID = $lastestID + 1;
+    //         } else {
+    //             $nextID = 1;
+    //         }
+    //         $model->id = 'User_'. sprintf("%03s",$nextID);
+    //         while (self::where("id",$model->id)->exists()) {
+    //             $nextID++;
+    //             $model->id = "User_". sprintf("%03s",$nextID);
+    //         }
+
+    // }));
+// }
     /**
      * The attributes that should be hidden for serialization.
      *
