@@ -12,10 +12,14 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Password;
 use Illuminate\Support\Facades\RateLimiter;
+use Laravel\Passport\Passport;
 // use Carbon\Carbon;
 
 class ApiController extends Controller
 {
+    // public function __construct() {
+    //     $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    // }
     //API register(POST)
     public function register(Request $request)
     {
@@ -103,6 +107,9 @@ class ApiController extends Controller
             $user = Auth::user();
 
             $token = $user->createToken("myToken")->accessToken;
+
+            // Passport::tokensExpireIn(now()->addHours());
+            // Passport::refreshTokensExpireIn();
 
             return response()->json([
                 "status" => true,
