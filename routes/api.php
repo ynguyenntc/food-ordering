@@ -20,19 +20,19 @@ use App\Http\Controllers\Api\ApiController;
 // });
 
 //Register
-Route::post("/register",[ApiController::class,"register"]);
+Route::post("register",[ApiController::class,"register"]);
 
 //login
-Route::post("/login",[ApiController::class,"login"]);
+Route::post("login",[ApiController::class,"login"]);
 //profile
 
-// Route::get("profile",[ApiController::class,"profile"])->middleware('auth:api');
+// Route::post("/logout",[ApiController::class,"logout"])->middleware('auth:api');
 
 Route::group([
     "middleware" => 'auth:api',
 ], function(){
 
     Route::get("profile", [ApiController::class, "profile"]);
-    // Route::get("logout", [ApiController::class, "logout"]);
+    Route::post("logout", [ApiController::class, "logout"]);
     Route::get("refresh", [ApiController::class,"refreshToken"]);
 });

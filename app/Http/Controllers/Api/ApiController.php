@@ -17,6 +17,8 @@ use Carbon\Carbon;
 use Laravel\Passport\Token;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Support\Facades\Http;
+use Laravel\Passport\TokenRepository;
+use Exception;
 
 
 
@@ -232,7 +234,7 @@ class ApiController extends Controller
         }           
         RateLimiter::increment('send-message:'.$request->email);
          // Data validation
-         $request->validate([
+        $request->validate([
             "email" => "required|email",
             "password" => "required"
         ]);
@@ -253,13 +255,10 @@ class ApiController extends Controller
                 "status" => true,
                 "message" => "Login successful",
                 "access_token" => $token->accessToken,
-                // $ttlSeconds = auth()->factory()->getTTL() * 60;
-                // "expires_at" => $token->getTTL() * 60
-
-
+                "expires_in" => $token->token->expires_at->diffInSeconds(now()),
+                "refresh_token" => $user->tokens->where('revoked', false)->first()->refresh_token,
             ]);
         }
-
         return response()->json([
             "status" => false,
             "message" => "Invalid credentials"
@@ -328,35 +327,42 @@ class ApiController extends Controller
         
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="Logout user",
+     *     tags={"Authentication"},
+     *     description="Invalidate the current user's token to logout",
+     *     security={{ "bearerAuth":{} }},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true, description="Indicates if the request was successful"),
+     *             @OA\Property(property="message", type="string", example="Logout successfully", description="A message indicating the outcome of the request")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated", description="A message indicating that the request lacks valid authentication credentials")
+     *         )
+     *     )
+     * )
+     */
+
     //logout
-    public function logout()
+    public function logout(Request $request)
     {
-
+        $token = $request->user()->token();
+        $token->revoke();
+        return response()->json([
+            "status"=> true,
+            "message"=> "Logout successfully",
+        ]);
     }
 
-    //refresh accesstoken
-    public function refreshToken()
-    {
-        // if(auth()->user()->token != null) {
-        if(auth()->user()){
-            // $response = Http::asForm()->post('http://localhost:8000/api/refresh', [
-            //     'grant_type' => 'refresh_token',
-            //     'refresh_token' => 'the-refresh-token',
-            //     'client_id' => 'client-id',
-            //     'client_secret' => 'client-secret',
-            //     'scope' => '',
-            // ]);
-            // return $response->json();
-            // auth()->user()->token()->refresh();
-            $newToken = Auth::parseToken()->refresh();
-        }
-        else{
-            return response()->json([
-                'success' => false,
-                'message' => "User is not Authenticated"]) ;
-        }
-        
+    
     }
-
-}
  //register, login, profile, login
