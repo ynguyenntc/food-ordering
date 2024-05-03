@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Dotenv\Exception\ValidationException;
 use Illuminate\Http\Request;
-//
+use App\Models\PasswordReset;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Password;
 use Illuminate\Support\Facades\RateLimiter;
@@ -19,6 +21,8 @@ use Illuminate\Auth\SessionGuard;
 use Illuminate\Support\Facades\Http;
 use Laravel\Passport\TokenRepository;
 use Exception;
+use Illuminate\Support\Str;
+use DB;
 
 
 
@@ -363,6 +367,65 @@ class ApiController extends Controller
         ]);
     }
 
+    //forgot password api
+    public function forgotpassword(Request $request)
+    {
+        //check email user có tồn tại hay không
+        $input = $request->all();
+        $rules = array(
+            'email' => "required|email|exists:users,email",
+        );
+        $validator = Validator::make($input, $rules);
+        #nếu không, trả kết quả lỗi
+        if ($validator->fails()){
+            return response()->json([
+                "status"=> false,
+                // "message" => $validator->errors()->first(),
+                "error"=>$validator->errors()
+            ]);
+        }
+        else{
+            $token = Str::random(20);
+            try{
+                
+                $domain = URL::to('/');
+                $url = $domain.'/reset-password?token='.$token;
+                $data['url'] = $url;
+                $data['email'] = $request->email;
+                $data['title'] = "Password Reset";
+                $data["body"] = "Please click here to reset your password ";
+
+                Mail::send('forgotPasswordMail', ['data'=>$data],function($message)use ($data){
+                    $message->to($data['email'])->subject($data['title']);
+                });
+
+                #lưu token và cập nhập email
+                DB::table("password_reset_tokens")->updateOrInsert([
+                    'email' => $request->email
+                ], [
+                'email' => $request->email,
+                'token' => $token,
+                'created_at' => now()
+                ]);
+                // Mail::send('emails.welcome', ['name' => 'John'], function($message) {
+                //     $message->to('john@example.com', 'John Doe')
+                //             ->subject('Welcome to our website');
+                // });
+
+                return response()->json([
+                    "message" => "please check your email to reset your password!"
+                ]);
+
+        }catch(Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        }
+
+    }
+
     
     }
- //register, login, profile, login
+ //register, login, profile, logout, forgot

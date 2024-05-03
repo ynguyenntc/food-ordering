@@ -26,6 +26,8 @@ Route::post("register",[ApiController::class,"register"]);
 Route::post("login",[ApiController::class,"login"]);
 //profile
 
+//forgot password
+Route::post("forgot-password",[ApiController::class,"forgotpassword"]);
 // Route::post("/logout",[ApiController::class,"logout"])->middleware('auth:api');
 
 Route::group([
