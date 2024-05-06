@@ -242,7 +242,6 @@ class ApiController extends Controller
             "email" => "required|email",
             "password" => "required"
         ]);
-
         // Auth Facade
         if(Auth::attempt([
             "email" => $request->email,
@@ -263,10 +262,12 @@ class ApiController extends Controller
                 "refresh_token" => $user->tokens->where('revoked', false)->first()->refresh_token,
             ]);
         }
+        else{
         return response()->json([
             "status" => false,
-            "message" => "Invalid credentials"
+            "message" => "Your email or password is not correct!"
         ]);
+    }
 
     }
 
@@ -389,7 +390,7 @@ class ApiController extends Controller
             try{
                 
                 $domain = URL::to('/');
-                $url = $domain.'/reset-password?token='.$token;
+                $url = $domain.'/change-password?token='.$token;
                 $data['url'] = $url;
                 $data['email'] = $request->email;
                 $data['title'] = "Password Reset";
@@ -420,6 +421,39 @@ class ApiController extends Controller
             ]);
         }
         }
+
+    }
+
+    public function changepassword(Request $request){
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required',
+            'new_password' => 'required',
+            'new_password_confirmed' => 'required|same:new_password'
+        ]);
+        if($validator->fails()){
+            return response()->json([
+                'success'=> false,
+                'error' => $validator->errors()
+        ]);
+        }else{
+        
+        $user=$request->user();
+        if (Hash::check($request->old_password, $user->password)) {
+            $user->update([
+                "password"=> Hash::make($request->new_password)
+            ]);
+            return response()->json([
+                "success"=> true,
+                "message"=> "Password reset sucessfully"
+            ]);
+        }
+        else{
+            return response()->json([
+                'message' => 'Your password is not correct!'
+            ]);
+        }
+    }
+
 
     }
 

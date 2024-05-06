@@ -28,6 +28,8 @@ Route::post("login",[ApiController::class,"login"]);
 
 //forgot password
 Route::post("forgot-password",[ApiController::class,"forgotpassword"]);
+
+
 // Route::post("/logout",[ApiController::class,"logout"])->middleware('auth:api');
 
 Route::group([
@@ -37,4 +39,5 @@ Route::group([
     Route::get("profile", [ApiController::class, "profile"]);
     Route::post("logout", [ApiController::class, "logout"]);
     Route::get("refresh", [ApiController::class,"refreshToken"]);
+    Route::post("change-password", [ApiController::class,"changepassword"]);
 });
