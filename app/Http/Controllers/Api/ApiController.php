@@ -395,6 +395,7 @@ class ApiController extends Controller
                 $data['title'] = "Password Reset";
                 $data["body"] = "Please click here to reset your password ";
 
+                // gửi thông báo qua mail cho user 
                 Mail::send('forgotPasswordMail', ['data'=>$data],function($message)use ($data){
                     $message->to($data['email'])->subject($data['title']);
                 });
@@ -407,10 +408,6 @@ class ApiController extends Controller
                 'token' => $token,
                 'created_at' => now()
                 ]);
-                // Mail::send('emails.welcome', ['name' => 'John'], function($message) {
-                //     $message->to('john@example.com', 'John Doe')
-                //             ->subject('Welcome to our website');
-                // });
 
                 return response()->json([
                     "message" => "please check your email to reset your password!"
